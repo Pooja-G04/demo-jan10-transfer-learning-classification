@@ -25,7 +25,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
             print('-' * 10)
 
             # Each epoch has a training and validation phase
-            for phase in ['train', 'val']:  # "val" instead of "test" to improve the model's learning
+            for phase in ['train', 'val']: 
                 if phase == 'train':
                     model.train()  # Set model to training mode
                 else:
@@ -39,17 +39,17 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
                     inputs = inputs.to(device)
                     labels = labels.to(device)
 
-                    # zero the parameter gradients
-                    optimizer.zero_grad()  # resetting gradient to 0 every epoch
+                    # zero the parameter gradients every iteration (before processing every batch)
+                    optimizer.zero_grad()  
 
-                    # forward
                     # track history if only in train
-                    with torch.set_grad_enabled(phase == 'train'):  # print the tensor values in colab
-                        outputs = model(inputs)
-                        _, preds = torch.max(outputs, 1)  # outputs is the 1D array along direction 1
+                    with torch.set_grad_enabled(phase == 'train'):  # gradients computed in training phase
+                        outputs = model(inputs) # output contains raw predictions for each batch (logits)
+                                                # outputs shape is (batch_size, num_classes)
+                        _, preds = torch.max(outputs, 1)  # outputs is the 1D array along the class dimension corresponding to the class with the highest probability
                         loss = criterion(outputs, labels)
 
-                        # backward + optimize only if in training phase
+                        # backprop + optimize only if in training phase
                         if phase == 'train':
                             loss.backward()
                             optimizer.step()
@@ -57,7 +57,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
                     # statistics
                     running_loss += loss.item() * inputs.size(0)
                     running_corrects += torch.sum(preds == labels.data)
-                if phase == 'train':
+                if phase == 'train': # update learning rate every iteration
                     scheduler.step()
 
                 epoch_loss = running_loss / dataset_sizes[phase]
