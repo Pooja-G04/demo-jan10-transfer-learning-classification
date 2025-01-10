@@ -1,0 +1,8 @@
+torch
+torchvision
+torcheval
+numpy
+matplotlib
+scikit-learn
+gradio
+splitfolders
